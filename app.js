@@ -125,6 +125,14 @@ function getDateKey(ms) {
 }
 
 async function fetchPriceMap() {
+  const todayKey = getDateKey(Date.now());
+  try {
+    const stored = localStorage.getItem('kaspa-price-map');
+    if (stored) {
+      const map = JSON.parse(stored);
+      if (map && typeof map === 'object' && map[todayKey]) return map;
+    }
+  } catch {}
   try {
     const now = Math.floor(Date.now() / 1000);
     const res = await fetch(`${KUCION_BASE}/api/v1/market/candles?symbol=KAS-USDT&type=1day&startAt=1660000000&endAt=${now}`);
@@ -132,11 +140,11 @@ async function fetchPriceMap() {
     const json = await res.json();
     if (json.code !== '200000' || !json.data) return null;
     const map = {};
-    const today = getDateKey(Date.now());
     json.data.forEach(candle => {
       const key = getDateKey(candle[0] * 1000);
-      map[key] = key === today ? parseFloat(candle[1]) : parseFloat(candle[2]);
+      map[key] = key === todayKey ? parseFloat(candle[1]) : parseFloat(candle[2]);
     });
+    try { localStorage.setItem('kaspa-price-map', JSON.stringify(map)); } catch {}
     return map;
   } catch {
     return null;
