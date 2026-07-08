@@ -1,0 +1,519 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+main {
+  width: 100%;
+  max-width: 540px;
+  padding: 48px 24px 32px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.logo {
+  font-size: 32px;
+  color: #ff8c00;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: #6e6e73;
+  line-height: 1.5;
+}
+
+.input-section {
+  margin-bottom: 24px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6e6e73;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-group {
+  display: flex;
+  gap: 8px;
+}
+
+#tx-input {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+  border: 1.5px solid #d2d2d7;
+  border-radius: 10px;
+  outline: none;
+  background: #fff;
+  color: #1d1d1f;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#tx-input::placeholder {
+  color: #aeaeb2;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+}
+
+#tx-input:focus {
+  border-color: #ff8c00;
+  box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.15);
+}
+
+#tx-input.error {
+  border-color: #ff3b30;
+  box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.15);
+}
+
+#generate-btn {
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: #ff8c00;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#generate-btn:hover {
+  background: #e67e00;
+}
+
+#generate-btn:active {
+  transform: scale(0.97);
+}
+
+#generate-btn:disabled {
+  background: #aeaeb2;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#generate-btn.loading {
+  position: relative;
+  color: transparent;
+}
+
+#generate-btn.loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.input-hint {
+  font-size: 12px;
+  color: #aeaeb2;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  margin: 0 auto 12px;
+  border: 3px solid rgba(255, 140, 0, 0.2);
+  border-top-color: #ff8c00;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.loading p {
+  font-size: 14px;
+  color: #6e6e73;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error {
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #cf1322;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#result {
+  animation: fadeUp 0.35s ease-out;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.receipt-card {
+  background: #fefef7;
+  border-radius: 16px;
+  padding: 32px 28px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.receipt-header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1.5px dashed #e8e8e0;
+}
+
+.receipt-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #1d1d1f;
+}
+
+.receipt-header .receipt-id {
+  font-size: 11px;
+  color: #aeaeb2;
+  margin-top: 4px;
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+}
+
+.receipt-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1.5px dashed #e8e8e0;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.status-badge.accepted {
+  background: #f6ffed;
+  color: #389e0d;
+}
+
+.status-badge.pending {
+  background: #fff7e6;
+  color: #d48806;
+}
+
+.status-badge .check {
+  font-size: 14px;
+}
+
+.confirmations {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.receipt-meta {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1.5px dashed #e8e8e0;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 3px 0;
+}
+
+.meta-label {
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+.meta-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1d1d1f;
+  text-align: right;
+}
+
+.receipt-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1.5px dashed #e8e8e0;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #aeaeb2;
+  margin-bottom: 8px;
+}
+
+.address-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.address {
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+  font-size: 12px;
+  color: #1d1d1f;
+  word-break: break-all;
+  line-height: 1.6;
+}
+
+.copy-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid #d2d2d7;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 3px 6px;
+  font-size: 12px;
+  color: #8c8c8c;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1;
+}
+
+.copy-btn:hover {
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.copy-btn.copied {
+  background: #f6ffed;
+  border-color: #b7eb8f;
+  color: #389e0d;
+}
+
+.output-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.output-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.output-address {
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+  font-size: 12px;
+  color: #1d1d1f;
+  word-break: break-all;
+  flex: 1;
+  min-width: 0;
+}
+
+.output-amount {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d1d1f;
+  white-space: nowrap;
+}
+
+.receipt-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1.5px dashed #e8e8e0;
+}
+
+.receipt-total .total-label {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.receipt-total .total-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ff8c00;
+}
+
+.receipt-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.footer-label {
+  font-size: 12px;
+  color: #8c8c8c;
+  white-space: nowrap;
+}
+
+.footer-value {
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+  font-size: 11px;
+  color: #1d1d1f;
+  word-break: break-all;
+  text-align: right;
+  min-width: 0;
+}
+
+.footer-value .copy-btn {
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.receipt-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.receipt-actions button {
+  flex: 1;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.btn-print {
+  background: #ff8c00;
+  color: #fff;
+  border: none;
+}
+
+.btn-print:hover {
+  background: #e67e00;
+}
+
+.btn-new {
+  background: #fff;
+  color: #1d1d1f;
+  border: 1.5px solid #d2d2d7;
+}
+
+.btn-new:hover {
+  background: #f5f5f7;
+  border-color: #aeaeb2;
+}
+
+footer {
+  text-align: center;
+  margin-top: 32px;
+}
+
+footer p {
+  font-size: 12px;
+  color: #aeaeb2;
+}
+
+footer a {
+  color: #aeaeb2;
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: #6e6e73;
+}
+
+@media (max-width: 480px) {
+  main {
+    padding: 32px 16px 24px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .input-group {
+    flex-direction: column;
+  }
+
+  #generate-btn {
+    width: 100%;
+  }
+
+  .receipt-card {
+    padding: 24px 18px;
+  }
+
+  .receipt-total .total-amount {
+    font-size: 16px;
+  }
+
+  .receipt-actions {
+    flex-direction: column;
+  }
+}

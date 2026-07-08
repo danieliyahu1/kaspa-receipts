@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kaspa Receipts</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <div class="header">
+      <div class="logo">&#9674;</div>
+      <h1>Kaspa Receipts</h1>
+      <p class="subtitle">Generate a printable receipt for any Kaspa transaction</p>
+    </div>
+
+    <div class="input-section">
+      <label for="tx-input">Transaction Hash</label>
+      <div class="input-group">
+        <input type="text" id="tx-input" placeholder="Paste 64-character transaction hash here..." maxlength="64" spellcheck="false" autocomplete="off">
+        <button id="generate-btn">Generate Receipt</button>
+      </div>
+      <p class="input-hint">A transaction hash is 64 hexadecimal characters (0-9, a-f)</p>
+    </div>
+
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Fetching transaction from the Kaspa network…</p>
+    </div>
+
+    <div id="error" class="error hidden" role="alert"></div>
+
+    <div id="result" class="hidden">
+      <div class="receipt-card" id="receipt-card"></div>
+    </div>
+
+    <footer>
+      <p>Powered by <a href="https://api.kaspa.org" target="_blank">api.kaspa.org</a></p>
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
