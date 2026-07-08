@@ -105,7 +105,7 @@ async function fetchAddressTransactions(address) {
   return res.json();
 }
 
-const CG_BASE = 'https://api.coingecko.com/api/v3';
+const HTX_BASE = 'https://api.huobi.pro';
 
 function formatUSD(amount) {
   return '$' + Number(amount).toLocaleString('en-US', {
@@ -118,77 +118,25 @@ function getKasAmount(sompi) {
   return Number(sompi) / 1e8;
 }
 
-async function fetchPriceForDate(timestampMs) {
-  const d = new Date(timestampMs);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  try {
-    const res = await fetch(`${CG_BASE}/coins/kaspa/history?date=${day}-${month}-${year}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.market_data?.current_price?.usd ?? null;
-  } catch {
-    return null;
-  }
+function getDateKey(ms) {
+  const d = new Date(ms);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 
-const CG_MAX_DAYS = 90;
-
-async function fetchPriceRange(fromMs, toMs) {
-  const fromS = Math.floor(fromMs / 1000);
-  const toS = Math.floor(toMs / 1000);
-  if (toS - fromS > CG_MAX_DAYS * 86400) return null;
+async function fetchPriceRange() {
   try {
-    const res = await fetch(`${CG_BASE}/coins/kaspa/market_chart/range?vs_currency=usd&from=${fromS}&to=${toS}`);
+    const res = await fetch(`${HTX_BASE}/market/history/kline?symbol=kasusdt&period=1day&size=2000`);
     if (!res.ok) return null;
-    const data = await res.json();
-    return data.prices || null;
-  } catch {
-    return null;
-  }
-}
-
-async function fetchPricesForTxs(txs) {
-  const timestamps = txs.map(t => t.block_time);
-  const minTime = Math.min(...timestamps);
-  const maxTime = Math.max(...timestamps);
-  const pricesList = await fetchPriceRange(minTime, maxTime);
-  if (pricesList) return buildPriceMap(pricesList, txs);
-  const uniqueDates = [...new Set(txs.map(t => {
-    const d = new Date(t.block_time);
-    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-  }))];
-  const datePriceMap = {};
-  for (const dateKey of uniqueDates) {
-    const tx = txs.find(t => {
-      const d = new Date(t.block_time);
-      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` === dateKey;
+    const json = await res.json();
+    if (json.status !== 'ok' || !json.data) return null;
+    const map = {};
+    json.data.forEach(candle => {
+      map[getDateKey(candle.id * 1000)] = candle.close;
     });
-    datePriceMap[dateKey] = await fetchPriceForDate(tx.block_time);
+    return map;
+  } catch {
+    return null;
   }
-  const map = {};
-  txs.forEach(tx => {
-    const d = new Date(tx.block_time);
-    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    map[tx.transaction_id] = datePriceMap[key];
-  });
-  return map;
-}
-
-function buildPriceMap(pricesList, txs) {
-  const map = {};
-  txs.forEach(tx => {
-    const txTime = tx.block_time;
-    let closest = pricesList[0];
-    for (const p of pricesList) {
-      if (Math.abs(p[0] - txTime) < Math.abs(closest[0] - txTime)) {
-        closest = p;
-      }
-    }
-    map[tx.transaction_id] = closest[1];
-  });
-  return map;
 }
 
 function getTxDirection(tx, address) {
@@ -331,7 +279,7 @@ function renderAddressStatement(txs, address, balance, priceMap) {
     const direction = getTxDirection(tx, address);
     const counterparty = getCounterparty(tx, address, direction);
     const amount = getTxAmount(tx, address, direction);
-    const price = priceMap ? priceMap[tx.transaction_id] : null;
+    const price = priceMap ? priceMap[getDateKey(tx.block_time)] : null;
     const usdAmount = price ? getKasAmount(amount) * price : null;
 
     if (direction === 'received') {
@@ -427,7 +375,7 @@ async function showStatement() {
       fetchAddressBalance(lastStatementAddress),
       fetchAddressTransactions(lastStatementAddress)
     ]);
-    const priceMap = txs.length ? await fetchPricesForTxs(txs) : null;
+    const priceMap = await fetchPriceRange();
     renderAddressStatement(txs, lastStatementAddress, balance, priceMap);
   } catch (err) {
     showError(err.message);
@@ -440,7 +388,8 @@ async function showTxDetail(txId) {
   showLoading(true);
   try {
     const tx = await fetchTransaction(txId);
-    const [price] = await Promise.all([fetchPriceForDate(tx.block_time)]);
+    const priceMap = await fetchPriceRange();
+    const price = priceMap ? priceMap[getDateKey(tx.block_time)] : null;
     statementCard.classList.add('hidden');
     receiptCard.classList.remove('hidden');
     renderReceipt(tx, price);
@@ -488,14 +437,15 @@ async function handleGenerate() {
       const [tx] = await Promise.all([
         fetchTransaction(raw)
       ]);
-      const price = await fetchPriceForDate(tx.block_time);
+      const priceMap = await fetchPriceRange();
+      const price = priceMap ? priceMap[getDateKey(tx.block_time)] : null;
       renderReceipt(tx, price);
     } else if (ADDRESS_REGEX.test(raw)) {
-      const [balance, txs] = await Promise.all([
+      const [balance, txs, priceMap] = await Promise.all([
         fetchAddressBalance(raw),
-        fetchAddressTransactions(raw)
+        fetchAddressTransactions(raw),
+        fetchPriceRange()
       ]);
-      const priceMap = await fetchPricesForTxs(txs);
       renderAddressStatement(txs, raw, balance, priceMap);
     } else {
       showError('Invalid format. Enter a 64-character transaction hash or a kaspa: address.');
