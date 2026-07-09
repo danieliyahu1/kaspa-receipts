@@ -213,7 +213,6 @@ function renderReceipt(tx, price) {
   receiptTx = { tx, price };
   const accepted = tx.is_accepted;
   const blockTime = tx.block_time;
-  const blueScore = tx.accepting_block_blue_score;
   const inputs = tx.inputs || [];
   const outputs = tx.outputs || [];
 
@@ -226,26 +225,21 @@ function renderReceipt(tx, price) {
   const usdTotal = price ? totalKas * price : null;
 
   receiptCard.innerHTML = `
-    <div class="receipt-header">
+      <div class="receipt-header">
       <h2>Kaspa Receipt</h2>
-      <div class="receipt-id">#${shortenHash(tx.transaction_id, 12)}</div>
+      <div class="receipt-id">Ref: ${shortenHash(tx.transaction_id, 12)}</div>
     </div>
 
     <div class="receipt-status">
       <span class="status-badge ${accepted ? 'accepted' : 'pending'}">
         ${accepted ? '<span class="check">&#10003;</span> Confirmed' : '<span class="check">&#9679;</span> Pending'}
       </span>
-      ${accepted ? `<span class="confirmations">${formatNumber(blueScore)} confirmations</span>` : ''}
     </div>
 
     <div class="receipt-meta">
       <div class="meta-row">
         <span class="meta-label">Date &amp; Time</span>
         <span class="meta-value">${formatDate(blockTime)}</span>
-      </div>
-      <div class="meta-row">
-        <span class="meta-label">Block</span>
-        <span class="meta-value">#${formatNumber(blueScore)}</span>
       </div>
     </div>
 
@@ -284,15 +278,11 @@ function renderReceipt(tx, price) {
 
     <div class="receipt-footer">
       <div class="footer-row">
-        <span class="footer-label">Transaction Hash</span>
+        <span class="footer-label">Transaction ID</span>
         <span class="footer-value">
-          ${shortenHash(tx.transaction_id, 16)}
+          ${tx.transaction_id}
           <button class="copy-btn" data-copy="${escapeHtml(tx.transaction_id)}">Copy</button>
         </span>
-      </div>
-      <div class="footer-row">
-        <span class="footer-label">Accepting Block</span>
-        <span class="footer-value">${shortenHash(tx.accepting_block_hash, 16)}</span>
       </div>
     </div>
 
@@ -518,7 +508,7 @@ async function handleGenerate() {
 
   if (!raw) {
     input.classList.add('error');
-    showError('Please enter a transaction hash or wallet address.');
+    showError('Please enter a transaction ID or wallet address.');
     input.focus();
     return;
   }
@@ -556,7 +546,7 @@ async function handleGenerate() {
       statement = { address: raw, balance: bal, txs, fromDate, toDate, page: 0 };
       renderStatement();
     } else {
-      showError('Invalid format. Enter a 64-character transaction hash or a kaspa: address.');
+      showError('That doesn\'t look like a Kaspa transaction or address. Try again.');
       showLoading(false);
       return;
     }

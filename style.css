@@ -27,9 +27,17 @@ main {
 }
 
 .logo {
-  font-size: 32px;
-  color: #ff8c00;
-  margin-bottom: 8px;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 10px;
+  background: #ff8c00;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
 }
 
@@ -138,13 +146,6 @@ label {
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
-}
-
-.input-hint {
-  font-size: 12px;
-  color: #aeaeb2;
-  margin-top: 6px;
-  line-height: 1.4;
 }
 
 .date-range {
@@ -306,11 +307,6 @@ label {
 
 .status-badge .check {
   font-size: 14px;
-}
-
-.confirmations {
-  font-size: 12px;
-  color: #8c8c8c;
 }
 
 .receipt-meta {
@@ -738,25 +734,6 @@ label {
   padding: 32px 0;
   color: #aeaeb2;
   font-size: 14px;
-}
-
-footer {
-  text-align: center;
-  margin-top: 32px;
-}
-
-footer p {
-  font-size: 12px;
-  color: #aeaeb2;
-}
-
-footer a {
-  color: #aeaeb2;
-  text-decoration: none;
-}
-
-footer a:hover {
-  color: #6e6e73;
 }
 
 .pagination {

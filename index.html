@@ -9,18 +9,17 @@
 <body>
   <main>
     <div class="header">
-      <div class="logo">&#9674;</div>
+      <div class="logo">K</div>
       <h1>Kaspa Receipts</h1>
-      <p class="subtitle">Generate a printable receipt for any Kaspa transaction</p>
+      <p class="subtitle">Your transactions. On paper.</p>
     </div>
 
     <div class="input-section">
       <label for="tx-input">Transaction or Address</label>
       <div class="input-group">
-        <input type="text" id="tx-input" placeholder="Paste a transaction hash or wallet address..." maxlength="80" spellcheck="false" autocomplete="off">
+        <input type="text" id="tx-input" placeholder="Paste a transaction ID or wallet address..." maxlength="80" spellcheck="false" autocomplete="off">
         <button id="generate-btn">Generate</button>
       </div>
-      <p class="input-hint">Hashes have 64 hex characters. Addresses start with <strong>kaspa:</strong></p>
       <div id="date-range-section" class="date-range hidden">
         <div class="date-range-group">
           <div class="date-field">
@@ -47,9 +46,7 @@
       <div id="statement-card" class="hidden"></div>
     </div>
 
-    <footer>
-      <p>Powered by <a href="https://api.kaspa.org" target="_blank">api.kaspa.org</a></p>
-    </footer>
+
   </main>
   <script src="app.js"></script>
 </body>
