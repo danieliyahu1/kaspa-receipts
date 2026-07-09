@@ -610,6 +610,10 @@ label {
   color: #d48806;
 }
 
+.amt-self {
+  color: #5a7d9a;
+}
+
 .tx-usd {
   font-size: 11px;
   font-weight: 500;

@@ -311,7 +311,7 @@ function renderAddressStatement(address, bal, page, priceMap) {
     const isSent = direction === 'sent';
     const symbol = isSent ? '&#8599;' : '&#8600;';
     const label = isSent ? 'Sent' : (direction === 'self' ? 'Self' : 'Received');
-    const amtClass = isSent ? 'amt-sent' : 'amt-received';
+    const amtClass = direction === 'self' ? 'amt-self' : (isSent ? 'amt-sent' : 'amt-received');
 
     const counterShort = counterparty.length > 30
       ? counterparty.slice(0, 16) + '…' + counterparty.slice(-6)
