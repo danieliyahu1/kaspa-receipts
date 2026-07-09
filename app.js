@@ -833,6 +833,7 @@ function renderStatement() {
 
   statementCard.innerHTML = `
     <div class="statement-header">
+      <h2>Kaspa Statement</h2>
       <div class="statement-address">
         ${shortenHash(address, 12)}
         <button class="copy-btn" data-copy="${escapeHtml(address)}">Copy</button>
