@@ -21,11 +21,23 @@
         <button id="generate-btn">Generate</button>
       </div>
       <p class="input-hint">Hashes have 64 hex characters. Addresses start with <strong>kaspa:</strong></p>
+      <div id="date-range-section" class="date-range hidden">
+        <div class="date-range-group">
+          <div class="date-field">
+            <label for="from-date">From</label>
+            <input type="date" id="from-date" class="date-input">
+          </div>
+          <div class="date-field">
+            <label for="to-date">To</label>
+            <input type="date" id="to-date" class="date-input">
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="loading" class="loading hidden">
       <div class="spinner"></div>
-      <p>Fetching data from the Kaspa network…</p>
+      <p id="loading-text">Fetching data from the Kaspa network…</p>
     </div>
 
     <div id="error" class="error hidden" role="alert"></div>

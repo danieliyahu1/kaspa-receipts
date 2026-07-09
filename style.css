@@ -147,6 +147,49 @@ label {
   line-height: 1.4;
 }
 
+.date-range {
+  margin-top: 16px;
+}
+
+.date-range-group {
+  display: flex;
+  gap: 12px;
+}
+
+.date-field {
+  flex: 1;
+}
+
+.date-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6e6e73;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.date-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  border: 1.5px solid #d2d2d7;
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  color: #1d1d1f;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.date-input:focus {
+  border-color: #ff8c00;
+  box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.15);
+}
+
 .loading {
   text-align: center;
   padding: 40px 0;
@@ -533,6 +576,59 @@ label {
 
 .statement-balance strong {
   color: #ff8c00;
+}
+
+.net-summary {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1.5px dashed #e8e8e0;
+}
+
+.summary-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #aeaeb2;
+  margin-bottom: 8px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 2px 0;
+  font-size: 13px;
+}
+
+.summary-label {
+  color: #6e6e73;
+}
+
+.summary-values {
+  text-align: right;
+}
+
+.summary-kas {
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.summary-usd {
+  font-size: 11px;
+  color: #6e6e73;
+  margin-top: 1px;
+}
+
+.summary-net {
+  padding-top: 6px;
+  margin-top: 6px;
+  border-top: 1px solid #e8e8e0;
+}
+
+.summary-net .summary-kas {
+  color: #ff8c00;
+  font-size: 15px;
 }
 
 .tx-list {
