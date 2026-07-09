@@ -820,8 +820,8 @@ function renderStatement() {
         <button class="copy-btn" data-copy="${escapeHtml(address)}">Copy</button>
       </div>
       <div class="statement-balance">Balance: <strong>${formatKAS(balance)}</strong></div>
+      <button class="card-btn card-btn-back" id="export-csv-btn">Download CSV</button>
       ${summaryHtml}
-      <button class="card-btn" id="export-csv-btn">Download CSV</button>
     </div>
     <div class="tx-list">
       <div class="tx-list-header">
