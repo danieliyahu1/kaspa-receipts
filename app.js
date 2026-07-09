@@ -32,6 +32,7 @@ let priceMap = null;
 let priceMapPromise = null;
 let currentPrice = null;
 let currentPricePromise = null;
+let fetchGeneration = 0;
 
 function showLoading(show, text) {
   log(`${show ? 'Showing' : 'Hiding'} loading state${text ? ': ' + text : ''}`);
@@ -280,7 +281,7 @@ function getTxAmount(tx, address, direction) {
     .reduce((sum, o) => sum + Number(o.amount), 0);
 }
 
-async function fetchAllTxsFromGenesis(address) {
+async function fetchAllTxsFromGenesis(address, onPage) {
   log('Fetching all txs from genesis for address:', address);
   const total = await fetchAddressTxCount(address);
   if (total === 0) {
@@ -300,6 +301,7 @@ async function fetchAllTxsFromGenesis(address) {
     allTxs.push(...txs);
     before = nextBefore;
     log('Fetched page, collected:', allTxs.length, 'total:', total);
+    if (onPage) onPage([...allTxs], pageNum, totalPages);
   } while (before);
 
   allTxs.reverse();
@@ -541,6 +543,7 @@ function renderProfitSummary(txs, address, txGains, fifoSummary, balance) {
 
 function exportCSV() {
   if (!statement) { warn('exportCSV called but statement is null'); return; }
+  if (statement._loadingMore) { warn('exportCSV called while data still loading'); return; }
   const { address, txs, txGains } = statement;
 
   const headers = ['Date', 'Direction', 'Amount (KAS)', 'USD Value', 'Counterparty', 'Transaction ID', 'Status', 'Cost Basis (USD)', 'Realized Gain (USD)'];
@@ -620,7 +623,7 @@ function buildPagination(current, total) {
 
 function renderStatement() {
   if (!statement) { warn('renderStatement called but statement is null'); return; }
-  const { address, balance, txs, page } = statement;
+  const { address, balance, txs, page, _loadingMore } = statement;
   const startIdx = page * PAGE_SIZE;
   const pageTxs = txs.slice(startIdx, startIdx + PAGE_SIZE);
   const totalPages = Math.max(1, Math.ceil(txs.length / PAGE_SIZE));
@@ -667,6 +670,13 @@ function renderStatement() {
     `;
   });
 
+  const loadingBanner = _loadingMore ? `
+    <div class="loading-more">
+      <span class="spinner"></span>
+      <span class="loading-more-text">Loading remaining transactions\u2026 page ${statement._loadingPage} of ${statement._loadingTotal}</span>
+    </div>
+  ` : '';
+
   statementCard.innerHTML = `
     <div class="statement-header">
       <h2>Kaspa History</h2>
@@ -682,8 +692,9 @@ function renderStatement() {
         <span>${txs.length} transaction${txs.length !== 1 ? 's' : ''}</span>
       </div>
       ${txRows || '<div class="tx-empty">No transactions found in this date range.</div>'}
+      ${loadingBanner}
     </div>
-    ${buildPagination(page, totalPages)}
+    ${_loadingMore ? '' : buildPagination(page, totalPages)}
   `;
 
   receiptCard.classList.add('hidden');
@@ -693,6 +704,7 @@ function renderStatement() {
 
 function goToPage(page) {
   if (!statement) { warn('goToPage called but statement is null'); return; }
+  if (statement._loadingMore) { warn('goToPage: data still loading'); return; }
   const totalPages = Math.ceil(statement.txs.length / PAGE_SIZE);
   if (page < 0 || page >= totalPages) { warn('goToPage: invalid page', page, 'totalPages:', totalPages); return; }
   log('Going to page:', page);
@@ -784,10 +796,30 @@ async function handleGenerate() {
     } else if (ADDRESS_REGEX.test(raw)) {
       log('Input matched address pattern');
       statement = null;
-      const [bal, allTxs] = await Promise.all([
-        fetchAddressBalance(raw),
-        fetchAllTxsFromGenesis(raw)
-      ]);
+      const bal = await fetchAddressBalance(raw);
+
+      let firstPage = true;
+      const gen = ++fetchGeneration;
+      const allTxs = await fetchAllTxsFromGenesis(raw, (partialTxs, pageNum, totalPages) => {
+        if (gen !== fetchGeneration) return;
+        if (firstPage && partialTxs.length > 0) {
+          firstPage = false;
+          statement = {
+            address: raw, balance: bal,
+            txs: partialTxs,
+            allTxs: null,
+            txGains: {}, fifoSummary: {},
+            page: 0, _gainsComputed: false, _loadingMore: true,
+            _loadingPage: pageNum, _loadingTotal: totalPages
+          };
+          renderStatement();
+          resultEl.classList.remove('hidden');
+          resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        const textEl = document.querySelector('.loading-more-text');
+        if (textEl) textEl.textContent = `Loading remaining transactions\u2026 page ${pageNum} of ${totalPages}`;
+      });
+
       log('All txs from genesis:', allTxs.length);
       const fifoResult = buildFIFOQueue(allTxs, raw, priceMap);
       const txs = [...allTxs].reverse();
@@ -796,7 +828,7 @@ async function handleGenerate() {
         address: raw, balance: bal, txs, allTxs,
         txGains: fifoResult.txGains,
         fifoSummary: { remainingCostBasis: fifoResult.remainingCostBasis, remainingAmountSompi: fifoResult.remainingAmountSompi },
-        page: 0, _gainsComputed: true
+        page: 0, _gainsComputed: true, _loadingMore: false
       };
       renderStatement();
     } else {

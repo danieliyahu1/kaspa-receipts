@@ -853,6 +853,23 @@ label {
   letter-spacing: 1px;
 }
 
+.loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 0;
+  font-size: 13px;
+  color: #aeaeb2;
+}
+
+.loading-more .spinner {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border-width: 2px;
+}
+
 .tx-list-header {
   display: flex;
   align-items: center;
