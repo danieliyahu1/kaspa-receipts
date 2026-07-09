@@ -74,7 +74,7 @@ describe('renderStatement', () => {
     statement = { address, balance: '500000000', txs: [], page: 0 };
     renderStatement();
     const card = document.getElementById('statement-card');
-    expect(card.innerHTML).toContain('Kaspa History');
+    expect(card.innerHTML).not.toContain('Kaspa History');
     expect(card.innerHTML).toContain('5.00 KAS'); // balance
     expect(card.innerHTML).toContain('No transactions found');
     statement = null;
