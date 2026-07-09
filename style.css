@@ -441,6 +441,12 @@ label {
   font-size: 15px;
 }
 
+.summary-current-value .summary-usd {
+  color: var(--kaspa-teal);
+  font-weight: 700;
+  font-size: 15px;
+}
+
 .cost-basis-value {
   font-size: 15px;
 }

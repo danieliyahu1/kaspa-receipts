@@ -30,6 +30,8 @@ let receiptTx = null;
 let statement = null;
 let priceMap = null;
 let priceMapPromise = null;
+let currentPrice = null;
+let currentPricePromise = null;
 
 function showLoading(show, text) {
   log(`${show ? 'Showing' : 'Hiding'} loading state${text ? ': ' + text : ''}`);
@@ -220,6 +222,24 @@ async function fetchPriceMap() {
     return map;
   } catch (e) {
     warn('Price map fetch failed:', e.message);
+    return null;
+  }
+}
+
+async function fetchCurrentPrice() {
+  log('Fetching current KAS price from kaspa.org...');
+  try {
+    const res = await fetch(`${API_BASE}/info/price`);
+    if (!res.ok) {
+      warn('Current price fetch returned', res.status);
+      return null;
+    }
+    const json = await res.json();
+    const price = parseFloat(json.price);
+    log('Current KAS price:', price);
+    return price;
+  } catch (e) {
+    warn('Current price fetch failed:', e.message);
     return null;
   }
 }
@@ -447,7 +467,7 @@ function renderReceipt(tx, price) {
   `;
 }
 
-function renderProfitSummary(txs, address, txGains, fifoSummary) {
+function renderProfitSummary(txs, address, txGains, fifoSummary, balance) {
   if (!txs.length) return '';
 
   let receivedSompi = 0, sentSompi = 0;
@@ -504,6 +524,15 @@ function renderProfitSummary(txs, address, txGains, fifoSummary) {
         <div class="summary-values">
           <div class="summary-usd cost-basis-value">${formatUSD(remainingCostBasis)}</div>
           ${remainingKas > 0 ? `<div class="summary-avg">${formatKAS(remainingAmountSompi)} at ${formatUSD(remainingCostBasis / remainingKas)} avg</div>` : ''}
+        </div>
+      </div>` : ''}
+      ${currentPrice !== null && balance > 0 ? `
+      <div class="summary-divider"></div>
+      <div class="summary-row summary-current-value">
+        <span class="summary-label">Current Value</span>
+        <div class="summary-values">
+          <div class="summary-usd current-value-amount">${formatUSD(getKasAmount(balance) * currentPrice)}</div>
+          <div class="summary-avg">${formatKAS(balance)} at ${formatUSD(currentPrice)}</div>
         </div>
       </div>` : ''}
       ${hadMissingPrice ? `<div class="summary-note">Some prices estimated prior to ${formatShortDate(priceMap._earliest)}</div>` : ''}
@@ -597,7 +626,7 @@ function renderStatement() {
   const pageTxs = txs.slice(startIdx, startIdx + PAGE_SIZE);
   const totalPages = Math.max(1, Math.ceil(txs.length / PAGE_SIZE));
 
-  const summaryHtml = renderProfitSummary(txs, address, statement.txGains, statement.fifoSummary);
+  const summaryHtml = renderProfitSummary(txs, address, statement.txGains, statement.fifoSummary, statement.balance);
 
   let txRows = '';
   pageTxs.forEach((tx) => {
@@ -852,6 +881,12 @@ priceMapPromise = fetchPriceMap().then(map => {
   priceMap = map;
   refreshUSD();
   return map;
+});
+currentPricePromise = fetchCurrentPrice().then(price => {
+  log('Current price initialization complete. Price:', price);
+  currentPrice = price;
+  refreshUSD();
+  return price;
 });
 initEventListeners();
 log('App initialized.');
