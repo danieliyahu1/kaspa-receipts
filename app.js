@@ -594,6 +594,29 @@ function renderProfitSummary(txs, address, txGains, fifoSummary, balance, loadin
         </div>`
       : '';
 
+  const profitRow = loadingMore && hasUsd && balance > 0
+    ? `<div class="summary-divider"></div>
+      <div class="summary-row summary-current-value">
+        <span class="summary-label">Profit / Loss</span>
+        <div class="summary-values">
+          <div class="summary-usd current-value-amount loading-placeholder"><span class="placeholder-spinner"></span></div>
+        </div>
+      </div>`
+    : currentPrice !== null && balance > 0 && showCostBasis
+      ? (() => {
+          const currentValue = getKasAmount(balance) * currentPrice;
+          const profit = currentValue - remainingCostBasis;
+          const isProfit = profit >= 0;
+          return `<div class="summary-divider"></div>
+            <div class="summary-row ${isProfit ? 'summary-profit' : 'summary-loss'}">
+              <span class="summary-label">${isProfit ? 'Unrealized Profit' : 'Unrealized Loss'}</span>
+              <div class="summary-values">
+                <div class="summary-usd profit-value">${isProfit ? '+' : ''}${formatUSD(profit)}</div>
+              </div>
+            </div>`;
+        })()
+      : '';
+
   return `
     <div class="net-summary">
       <div class="summary-title">Summary</div>
@@ -612,6 +635,7 @@ function renderProfitSummary(txs, address, txGains, fifoSummary, balance, loadin
       ${costBasisRow}
       ${avgPriceRow}
       ${currentValueRow}
+      ${profitRow}
       ${hadMissingPrice ? `<div class="summary-note">Some prices estimated prior to ${formatShortDate(priceMap._earliest)}</div>` : ''}
     </div>
   `;
