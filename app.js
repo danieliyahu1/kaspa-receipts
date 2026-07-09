@@ -330,14 +330,18 @@ async function fetchAllTxsFromGenesis(address, onPage) {
           .then(txs => {
             done++;
             const left = totalRemaining - done;
-            if (left > 0) showLoading(true, `${left} page${left !== 1 ? 's' : ''} remaining`);
+            if (left > 0) {
+              showLoading(true, `${left} page${left !== 1 ? 's' : ''} remaining`);
+            } else {
+              showLoading(true, 'Processing transactions\u2026');
+            }
             return txs;
           })
       );
       offset += 500;
     }
     const results = await Promise.all(promises);
-    showLoading(true, 'Processing transactions\u2026');
+    await new Promise(r => setTimeout(r, 0));
     for (const txs of results) {
       allTxs.push(...txs);
     }
