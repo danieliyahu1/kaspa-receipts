@@ -282,7 +282,7 @@ function renderReceipt(tx, price) {
       <span class="total-label">Total</span>
       <div class="total-values">
         <span class="total-amount">${formatKAS(totalSompi)}</span>
-        ${usdTotal !== null ? `<span class="total-usd">≈ ${formatUSD(usdTotal)} USD</span>` : '<span class="total-usd na">— USD</span>'}
+        ${usdTotal !== null ? `<span class="total-usd">≈ ${formatUSD(usdTotal)} USD</span>` : '<span class="total-usd na unavailable" title="No price data for this date">— USD</span>'}
       </div>
     </div>
 
@@ -303,12 +303,14 @@ function renderNetSummary(txs, address) {
 
   let receivedSompi = 0, sentSompi = 0;
   let receivedUsd = 0, sentUsd = 0;
+  let hadMissingPrice = false;
 
   txs.forEach(tx => {
     const direction = getTxDirection(tx, address);
     const amount = getTxAmount(tx, address, direction);
     const kas = getKasAmount(amount);
     const price = priceMap ? priceMap[getDateKey(tx.block_time)] : null;
+    if (!price && priceMap) hadMissingPrice = true;
     const usd = price ? kas * price : 0;
 
     if (direction === 'received') { receivedSompi += amount; receivedUsd += usd; }
@@ -343,6 +345,7 @@ function renderNetSummary(txs, address) {
           ${hasUsd ? `<div class="summary-usd">≈ ${formatUSD(netUsd)} USD</div>` : ''}
         </div>
       </div>
+      ${hasUsd && hadMissingPrice ? '<div class="summary-note">* Price data unavailable for some transactions</div>' : ''}
     </div>
   `;
 }
@@ -420,7 +423,7 @@ function renderStatement() {
         <div class="tx-right">
           <span class="tx-direction ${amtClass}">${symbol} ${label}</span>
           <span class="tx-amount ${amtClass}">${formatKAS(amount)}</span>
-          ${usdAmount !== null ? `<span class="tx-usd">${formatUSD(usdAmount)}</span>` : '<span class="tx-usd na">—</span>'}
+          ${usdAmount !== null ? `<span class="tx-usd">${formatUSD(usdAmount)}</span>` : '<span class="tx-usd na unavailable" title="No price data for this date">—</span>'}
           ${status}
         </div>
       </div>

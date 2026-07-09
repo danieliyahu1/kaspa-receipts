@@ -433,6 +433,19 @@ label {
   color: #d2d2d7 !important;
 }
 
+.unavailable {
+  text-decoration: underline dotted #aeaeb2;
+  cursor: help;
+}
+
+.summary-note {
+  font-size: 11px;
+  color: #aeaeb2;
+  text-align: right;
+  margin-top: 8px;
+  font-style: italic;
+}
+
 
 .receipt-actions {
   display: flex;
