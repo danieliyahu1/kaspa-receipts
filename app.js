@@ -511,12 +511,6 @@ function renderProfitSummary(txs, address, txGains, fifoSummary, balance) {
           <div class="summary-kas">${formatKAS(sentSompi)}</div>
         </div>
       </div>
-      <div class="summary-row summary-net">
-        <span class="summary-label">Change</span>
-        <div class="summary-values">
-          <div class="summary-kas">${formatKAS(netSompi)}</div>
-        </div>
-      </div>
       ${showCostBasis ? `
       <div class="summary-divider"></div>
       <div class="summary-row summary-cost-basis">
