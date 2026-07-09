@@ -428,6 +428,7 @@ function renderStatement() {
         <button class="copy-btn" data-copy="${escapeHtml(address)}">Copy</button>
       </div>
       <div class="statement-balance">Balance: <strong>${formatKAS(balance)}</strong></div>
+      ${summaryHtml}
     </div>
     <div class="tx-list">
       <div class="tx-list-header">
@@ -436,7 +437,6 @@ function renderStatement() {
       </div>
       ${txRows || '<div class="tx-empty">No transactions found in this date range.</div>'}
     </div>
-    ${summaryHtml}
     ${buildPagination(page, totalPages)}
     <div class="receipt-actions">
       <button class="btn-new" id="search-btn">New Search</button>
