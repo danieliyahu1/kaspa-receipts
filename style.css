@@ -274,11 +274,13 @@ label {
 }
 
 .receipt-ref {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
   font-size: 11px;
   color: #aeaeb2;
   font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
-  word-break: break-all;
   margin-top: 16px;
   padding-top: 12px;
   border-top: 1.5px dashed #e8e8e0;

@@ -256,6 +256,7 @@ function renderReceipt(tx, price) {
         ? fromAddresses.map(addr => `
             <div class="address-block">
               <span class="address">${escapeHtml(addr)}</span>
+              <button class="copy-btn" data-copy="${escapeHtml(addr)}">Copy</button>
             </div>
           `).join('')
         : '<span class="address" style="color:#aeaeb2">Coinbase (new block reward)</span>'
@@ -267,7 +268,10 @@ function renderReceipt(tx, price) {
       <div class="output-list">
         ${outputs.map(o => `
           <div class="output-row">
-            <span class="output-address">${escapeHtml(o.script_public_key_address)}</span>
+            <span class="output-address">
+              ${escapeHtml(o.script_public_key_address)}
+              <button class="copy-btn" data-copy="${escapeHtml(o.script_public_key_address)}">Copy</button>
+            </span>
             <span class="output-amount">${formatKAS(o.amount)}</span>
           </div>
         `).join('')}
@@ -282,7 +286,10 @@ function renderReceipt(tx, price) {
       </div>
     </div>
 
-    <div class="receipt-ref">${tx.transaction_id}</div>
+    <div class="receipt-ref">
+      ${shortenHash(tx.transaction_id, 16)}
+      <button class="copy-btn" data-copy="${escapeHtml(tx.transaction_id)}">Copy</button>
+    </div>
 
     <div class="receipt-actions">
       ${statement ? '<button class="btn-back" id="back-btn">Back to Statement</button>' : ''}
@@ -577,6 +584,9 @@ function initEventListeners() {
   button.addEventListener('click', handleGenerate);
 
   receiptCard.addEventListener('click', (e) => {
+    const copyBtn = e.target.closest('.copy-btn');
+    if (copyBtn && copyBtn.dataset.copy) { copyToClipboard(copyBtn.dataset.copy, copyBtn); return; }
+
     if (e.target.closest('#back-btn') && statement) {
       renderStatement();
       resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
