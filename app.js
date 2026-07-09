@@ -40,6 +40,7 @@ function showLoading(show, text) {
   button.classList.toggle('loading', show);
   button.disabled = show;
   if (text !== undefined) loadingText.textContent = text;
+  if (!show) resetProgress();
 }
 
 function showError(message) {
@@ -115,6 +116,28 @@ function getDateKey(ms) {
 
 function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function hideSkeleton() {
+  const sk = $('skeleton');
+  if (sk) sk.classList.add('hidden');
+}
+
+function showProgress(current, total) {
+  const bar = $('progress-bar');
+  const container = $('progress-container');
+  if (container) container.classList.remove('hidden');
+  if (bar) {
+    const pct = Math.min(100, Math.round((current / total) * 100));
+    bar.style.width = pct + '%';
+  }
+}
+
+function resetProgress() {
+  const bar = $('progress-bar');
+  const container = $('progress-container');
+  if (container) container.classList.add('hidden');
+  if (bar) bar.style.width = '0%';
 }
 
 async function fetchTransaction(txId) {
@@ -307,15 +330,14 @@ async function fetchAllTxsFromGenesis(address, onPage) {
   let pageNum = 0;
   const totalPages = Math.ceil(total / 500);
 
-  showLoading(true, `Fetching transactions\u2026 page 1 of ${totalPages}`);
+  showLoading(true, 'Building your statement\u2026');
   const { txs: firstPageTxs, nextBefore } = await fetchAddressTxsPage(address, null);
   pageNum++;
   allTxs.push(...firstPageTxs);
+  showProgress(pageNum, totalPages);
   if (onPage) onPage([...allTxs], pageNum, totalPages, total);
 
   if (nextBefore) {
-    const totalRemaining = totalPages - 1;
-    showLoading(true, `${totalRemaining} page${totalRemaining !== 1 ? 's' : ''} remaining`);
     const promises = [];
     let done = 0;
     let offset = 500;
@@ -329,12 +351,7 @@ async function fetchAllTxsFromGenesis(address, onPage) {
           })
           .then(txs => {
             done++;
-            const left = totalRemaining - done;
-            if (left > 0) {
-              showLoading(true, `${left} page${left !== 1 ? 's' : ''} remaining`);
-            } else {
-              showLoading(true, 'Processing transactions\u2026');
-            }
+            showProgress(pageNum + done, totalPages);
             return txs;
           })
       );
@@ -858,7 +875,7 @@ async function showTxDetail(txId) {
     statementCard.classList.add('hidden');
     receiptCard.classList.remove('hidden');
     renderReceipt(tx, price);
-    $('actions-bar').innerHTML = '<button class="btn-back" id="back-btn">Back to Statement</button><button class="btn-export" id="export-receipt-btn">Export</button>';
+    $('actions-bar').innerHTML = '<button class="btn-back" id="back-btn">Back to Statement</button><button class="btn-export" id="export-receipt-btn">Export CSV</button>';
     $('actions-bar').classList.remove('hidden');
   } catch (err) {
     error('showTxDetail error:', err.message);
@@ -902,6 +919,7 @@ function resetForm() {
 async function handleGenerate() {
   const raw = input.value.trim().toLowerCase();
   log('handleGenerate triggered with input:', raw);
+  hideSkeleton();
   hideError();
   resultEl.classList.add('hidden');
   receiptCard.classList.add('hidden');
@@ -931,7 +949,7 @@ async function handleGenerate() {
       const tx = await fetchTransaction(raw);
       const price = priceMap ? priceMap[getDateKey(tx.block_time)] : null;
       renderReceipt(tx, price);
-      $('actions-bar').innerHTML = '<button class="btn-export" id="export-receipt-btn">Export</button>';
+      $('actions-bar').innerHTML = '<button class="btn-export" id="export-receipt-btn">Export CSV</button>';
       $('actions-bar').classList.remove('hidden');
     } else if (ADDRESS_REGEX.test(raw)) {
       log('Input matched address pattern');
