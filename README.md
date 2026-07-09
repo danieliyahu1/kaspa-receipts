@@ -1,6 +1,6 @@
 # Kaspa Receipts
 
-Generate printable receipts and transaction history for Kaspa wallet addresses.
+Generate printable receipts, transaction history, and tax summaries for Kaspa wallet addresses.
 
 A pure client-side single-page app. No backend, no database, no build step — just a static HTML file you can open in a browser or deploy anywhere.
 
@@ -12,9 +12,10 @@ A pure client-side single-page app. No backend, no database, no build step — j
 
 - **Transaction Receipt** — Paste a Kaspa TX hash to see a paper-style receipt with from/to addresses, amounts, confirmation status, and USD value.
 - **Wallet History** — Enter a `kaspa:` address with a date range to get a paginated transaction history with net summary.
-- **USD Pricing** — Fetches daily KAS/USDT rates from Bybit. USD equivalents shown on receipts, statement rows, net summary, and CSV export.
+- **FIFO Cost-Basis Tracking** — Automatically computes realized gain/loss on every sent transaction using First-In-First-Out lot accounting across the full wallet history. Cost basis, sale value, and profit are shown per-transaction and aggregated in the summary.
+- **USD Pricing** — Fetches daily KAS/USDT rates from Bybit (up to 1000 days). USD equivalents shown on receipts, statement rows, net summary, and CSV export.
 - **Transaction Classification** — Automatically detects `Received`, `Sent`, or `Self` (self-transfer) transactions.
-- **CSV Export** — Download transaction history as a CSV file.
+- **CSV Export** — Download transaction history as a CSV file including cost basis and realized gain columns.
 - **Dark Mode** — Full dark theme with Kaspa brand colors.
 
 ## Usage
@@ -31,6 +32,7 @@ A pure client-side single-page app. No backend, no database, no build step — j
 2. Select a date range (defaults to the last 12 months).
 3. Click **Look Up**.
 4. Browse the paginated transaction list. Click any row to drill into its receipt.
+5. Each sent transaction displays its realized gain/loss based on FIFO lot matching.
 
 ## Run Locally
 
@@ -53,7 +55,7 @@ npm install
 npm test
 ```
 
-Uses [Vitest](https://vitest.dev/) with [jsdom](https://github.com/jsdom/jsdom). 80+ tests covering API, DOM rendering, and utility functions.
+Uses [Vitest](https://vitest.dev/) with [jsdom](https://github.com/jsdom/jsdom). 130+ tests covering API, DOM rendering, utility functions, and FIFO cost-basis logic.
 
 ## API
 
