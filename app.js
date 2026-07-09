@@ -489,8 +489,11 @@ function refreshUSD() {
 
 function setDefaultDateRange() {
   const today = new Date();
-  fromDateInput.value = '2021-11-11';
+  const yearAgo = new Date();
+  yearAgo.setFullYear(today.getFullYear() - 1);
+  fromDateInput.value = yearAgo.toISOString().split('T')[0];
   toDateInput.value = today.toISOString().split('T')[0];
+  toDateInput.max = today.toISOString().split('T')[0];
 }
 
 function resetForm() {
