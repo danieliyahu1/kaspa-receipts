@@ -21,7 +21,6 @@ const $ = (id) => document.getElementById(id);
 const input = $('tx-input');
 const button = $('generate-btn');
 const loadingEl = $('loading');
-const loadingText = $('loading-text');
 const errorEl = $('error');
 const resultEl = $('result');
 const receiptCard = $('receipt-card');
@@ -34,12 +33,10 @@ let currentPrice = null;
 let currentPricePromise = null;
 let fetchGeneration = 0;
 
-function showLoading(show, text) {
-  log(`${show ? 'Showing' : 'Hiding'} loading state${text ? ': ' + text : ''}`);
+function showLoading(show) {
   loadingEl.classList.toggle('hidden', !show);
   button.classList.toggle('loading', show);
   button.disabled = show;
-  if (text !== undefined) loadingText.textContent = text;
   if (!show) resetProgress();
 }
 
@@ -325,7 +322,7 @@ async function fetchAllTxsFromGenesis(address, onPage) {
   let pageNum = 0;
   const totalPages = Math.ceil(total / 500);
 
-  showLoading(true, 'Building your statement\u2026');
+  showLoading(true);
   const { txs: firstPageTxs, nextBefore } = await fetchAddressTxsPage(address, null);
   pageNum++;
   allTxs.push(...firstPageTxs);

@@ -10,7 +10,6 @@ document.body.innerHTML = `
   <button id="generate-btn">Generate</button>
   <div id="loading" class="hidden">
     <div class="spinner"></div>
-    <p id="loading-text">Looking up your transaction…</p>
     <div class="progress-bar-container hidden" id="progress-container">
       <div class="progress-bar" id="progress-bar"></div>
     </div>
