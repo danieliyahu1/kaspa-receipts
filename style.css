@@ -119,6 +119,9 @@ label {
 }
 
 #generate-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 12px 20px;
   font-size: 14px;
   font-weight: 600;
@@ -503,6 +506,10 @@ label {
 
 .actions-bar button {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 10px;
   font-size: 13px;
   font-weight: 600;
@@ -522,7 +529,10 @@ label {
 }
 
 .card-btn {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   width: 100%;
   padding: 10px;
   font-size: 13px;
@@ -891,6 +901,11 @@ label {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 8px;
+}
+
+button svg {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 /* ── Progress Bar ── */

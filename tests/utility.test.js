@@ -252,11 +252,11 @@ describe('copyToClipboard', () => {
     navigator.clipboard.writeText = vi.fn(() => Promise.resolve());
 
     const btn = document.createElement('button');
-    btn.textContent = 'Copy';
+    btn.innerHTML = ICONS.copy;
     await copyToClipboard('test text', btn);
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('test text');
-    expect(btn.textContent).toBe('Copied!');
+    expect(btn.innerHTML).toContain('polyline points="20 6 9 17 4 12"');
     expect(btn.classList.contains('copied')).toBe(true);
 
     navigator.clipboard.writeText = writeText;

@@ -18,6 +18,16 @@ function error(...args) {
 
 const $ = (id) => document.getElementById(id);
 
+const ICONS = {
+  search: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  copy: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  download: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  arrowLeft: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>',
+  chevronLeft: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+  chevronRight: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+};
+
 const input = $('tx-input');
 const button = $('generate-btn');
 const loadingEl = $('loading');
@@ -86,10 +96,10 @@ function shortenHash(hash, chars = 8) {
 
 function copyToClipboard(text, btnEl) {
   navigator.clipboard.writeText(text).then(() => {
-    btnEl.textContent = 'Copied!';
+    btnEl.innerHTML = ICONS.check;
     btnEl.classList.add('copied');
     setTimeout(() => {
-      btnEl.textContent = 'Copy';
+      btnEl.innerHTML = ICONS.copy;
       btnEl.classList.remove('copied');
     }, 2000);
   });
@@ -485,7 +495,7 @@ function renderReceipt(tx, price) {
         ? fromAddresses.map(addr => `
             <div class="address-block">
               <span class="address">${shortenHash(addr, 12)}</span>
-              <button class="copy-btn" data-copy="${escapeHtml(addr)}">Copy</button>
+              <button class="copy-btn" data-copy="${escapeHtml(addr)}">${ICONS.copy}</button>
             </div>
           `).join('')
         : '<span class="address" style="color:#aeaeb2">Coinbase (new block reward)</span>'
@@ -776,7 +786,7 @@ function buildPagination(current, total) {
 
   let html = '<div class="pagination">';
 
-  html += `<button class="page-btn" data-page="${current - 1}" ${current === 0 ? 'disabled' : ''}>&#171; Prev</button>`;
+  html += `<button class="page-btn" data-page="${current - 1}" ${current === 0 ? 'disabled' : ''} aria-label="Previous">${ICONS.chevronLeft}</button>`;
 
   const maxVisible = 7;
   let start = Math.max(0, current - Math.floor(maxVisible / 2));
@@ -799,7 +809,7 @@ function buildPagination(current, total) {
     html += `<button class="page-btn" data-page="${total - 1}">${total}</button>`;
   }
 
-  html += `<button class="page-btn" data-page="${current + 1}" ${current >= total - 1 ? 'disabled' : ''}>Next &#187;</button>`;
+  html += `<button class="page-btn" data-page="${current + 1}" ${current >= total - 1 ? 'disabled' : ''} aria-label="Next">${ICONS.chevronRight}</button>`;
 
   html += '</div>';
   return html;
@@ -863,7 +873,7 @@ function renderStatement() {
       <h2>Kaspa Statement</h2>
       <div class="statement-address">
         ${shortenHash(address, 12)}
-        <button class="copy-btn" data-copy="${escapeHtml(address)}">Copy</button>
+        <button class="copy-btn" data-copy="${escapeHtml(address)}" aria-label="Copy address">${ICONS.copy}</button>
       </div>
       <div class="statement-balance">Balance: <strong>${formatKAS(balance)}</strong></div>
       ${summaryHtml}
@@ -875,12 +885,12 @@ function renderStatement() {
       ${txRows || '<div class="tx-empty">No transactions found in this date range.</div>'}
       ${loadingBanner}
     </div>
-    ${_loadingMore ? `<div class="pagination"><button class="page-btn" disabled>&#171; Prev</button><span class="page-info">Page 1 of ${Math.ceil(statement._totalTxCount / PAGE_SIZE)}</span><button class="page-btn" disabled>Next &#187;</button></div>` : buildPagination(page, totalPages)}
+    ${_loadingMore ? `<div class="pagination"><button class="page-btn" disabled aria-label="Previous">${ICONS.chevronLeft}</button><span class="page-info">Page 1 of ${Math.ceil(statement._totalTxCount / PAGE_SIZE)}</span><button class="page-btn" disabled aria-label="Next">${ICONS.chevronRight}</button></div>` : buildPagination(page, totalPages)}
   `;
 
   receiptCard.classList.add('hidden');
   statementCard.classList.remove('hidden');
-  $('actions-bar').innerHTML = '<button class="card-btn card-btn-back" id="export-csv-btn">Download CSV</button>';
+  $('actions-bar').innerHTML = `<button class="card-btn card-btn-back" id="export-csv-btn" aria-label="Download CSV">${ICONS.download}</button>`;
   $('actions-bar').classList.remove('hidden');
 }
 
@@ -903,7 +913,7 @@ async function showTxDetail(txId) {
     statementCard.classList.add('hidden');
     receiptCard.classList.remove('hidden');
     renderReceipt(tx, price);
-    $('actions-bar').innerHTML = '<button class="card-btn card-btn-back" id="back-btn">&#8592; Back to Statement</button><button class="card-btn card-btn-back" id="export-receipt-btn">Download CSV</button>';
+    $('actions-bar').innerHTML = `<button class="card-btn card-btn-back" id="back-btn" aria-label="Back to Statement">${ICONS.arrowLeft}</button><button class="card-btn card-btn-back" id="export-receipt-btn" aria-label="Download CSV">${ICONS.download}</button>`;
     $('actions-bar').classList.remove('hidden');
   } catch (err) {
     error('showTxDetail error:', err.message);
@@ -976,7 +986,7 @@ async function handleGenerate() {
       const tx = await fetchTransaction(raw);
       const price = priceMap ? priceMap[getDateKey(tx.block_time)] : null;
       renderReceipt(tx, price);
-      $('actions-bar').innerHTML = '<button class="card-btn card-btn-back" id="export-receipt-btn">Download CSV</button>';
+      $('actions-bar').innerHTML = `<button class="card-btn card-btn-back" id="export-receipt-btn" aria-label="Download CSV">${ICONS.download}</button>`;
       $('actions-bar').classList.remove('hidden');
     } else if (ADDRESS_REGEX.test(raw)) {
       log('Input matched address pattern');

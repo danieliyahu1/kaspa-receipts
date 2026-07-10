@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Set up required DOM elements before app.js runs
 document.body.innerHTML = `
   <input type="text" id="tx-input" spellcheck="false" autocomplete="off">
-  <button id="generate-btn">Generate</button>
+  <button id="generate-btn" aria-label="Generate"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
   <div id="loading" class="hidden">
     <div class="spinner"></div>
     <div class="progress-bar-container hidden" id="progress-container">
@@ -16,7 +16,7 @@ document.body.innerHTML = `
   </div>
   <div id="error" class="error hidden" role="alert"></div>
   <div id="actions-bar" class="actions-bar hidden">
-    <button class="card-btn card-btn-back" id="export-csv-btn">Download CSV</button>
+    <button class="card-btn card-btn-back" id="export-csv-btn" aria-label="Download CSV"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
   </div>
   <div id="result" class="hidden">
     <div class="receipt-card" id="receipt-card"></div>
@@ -37,6 +37,7 @@ console.error = () => {};
 let appCode = readFileSync(resolve(__dirname, '..', 'app.js'), 'utf-8');
 
 appCode = appCode
+  .replace('const ICONS = {', 'globalThis.ICONS = {')
   .replace('let receiptTx = null;', 'globalThis.receiptTx = null;')
   .replace('let statement = null;', 'globalThis.statement = null;')
   .replace('let priceMap = null;', 'globalThis.priceMap = null;')

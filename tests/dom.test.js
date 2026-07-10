@@ -23,7 +23,7 @@ describe('renderReceipt', () => {
     expect(card.innerHTML).toContain('Kaspa Receipt');
     expect(card.innerHTML).toContain('Confirmed');
     expect(card.innerHTML).toContain('3.00 KAS'); // total of both outputs
-    expect(card.innerHTML).toContain('Copy');
+    expect(card.innerHTML).toContain('svg');
   });
 
   it('renders pending status for unaccepted tx', () => {
@@ -185,7 +185,7 @@ describe('renderStatement', () => {
     statement = { address, balance: '100000000', txs, page: 0 };
     renderStatement();
     const card = document.getElementById('statement-card');
-    expect(card.innerHTML).toContain('Next');
+    expect(card.innerHTML).toContain('polyline points="9 18 15 12 9 6"');
     expect(card.innerHTML).toContain('60 transactions');
     statement = null;
   });
@@ -195,7 +195,7 @@ describe('renderStatement', () => {
     renderStatement();
     const bar = document.getElementById('actions-bar');
     expect(bar.classList.contains('hidden')).toBe(false);
-    expect(bar.innerHTML).toContain('Download CSV');
+    expect(bar.innerHTML).toContain('polyline points="7 10 12 15 17 10"');
     statement = null;
   });
 });
@@ -459,8 +459,8 @@ describe('buildPagination', () => {
 
   it('includes prev/next buttons', () => {
     const html = buildPagination(0, 5);
-    expect(html).toContain('Prev');
-    expect(html).toContain('Next');
+    expect(html).toContain('polyline points="15 18 9 12 15 6"');
+    expect(html).toContain('polyline points="9 18 15 12 9 6"');
   });
 
   it('disables prev on first page', () => {
