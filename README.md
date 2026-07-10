@@ -48,15 +48,6 @@ npx http-server
 
 Then open the address shown in your terminal.
 
-## Run Tests
-
-```bash
-npm install
-npm test
-```
-
-Uses [Vitest](https://vitest.dev/) with [jsdom](https://github.com/jsdom/jsdom). 130+ tests covering API, DOM rendering, utility functions, and FIFO cost-basis logic.
-
 ## API
 
 All data is fetched live from:
