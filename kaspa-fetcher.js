@@ -212,31 +212,39 @@ async function fetchCurrentPrice() {
 }
 
 async function fetchTransaction(txId, network) {
-  const base = network === 'kaspa:testnet-10' ? TESTNET_API : MAINNET_API;
+  const bases = network
+    ? [network === 'kaspa:testnet-10' ? TESTNET_API : MAINNET_API]
+    : [TESTNET_API, MAINNET_API];
   const params = new URLSearchParams({
     inputs: 'true', outputs: 'true', resolve_previous_outpoints: 'light'
   });
-  const url = `${base}/transactions/${txId}?${params}`;
 
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      const res = await fetch(url);
-      if (!res.ok) {
-        if (res.status === 404) throw new Error('Transaction not found. Check the hash and try again.');
-        if (res.status === 422) throw new Error('Invalid transaction hash format.');
-        throw new Error('The Kaspa network is currently unavailable. Please try again.');
-      }
-      return res.json();
-    } catch (err) {
-      if (attempt === 3) throw err;
-      const isNetworkError = err.message.includes('Failed to fetch') || err.message === 'Network error';
-      if (isNetworkError) {
-        await new Promise(r => setTimeout(r, attempt * 1000));
-      } else {
-        throw err;
+  let lastErr;
+  for (const base of bases) {
+    const url = `${base}/transactions/${txId}?${params}`;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) {
+          if (res.status === 404) {
+            lastErr = new Error('Transaction not found. Check the hash and try again.');
+            break;
+          }
+          if (res.status === 422) throw new Error('Invalid transaction hash format.');
+          throw new Error('The Kaspa network is currently unavailable. Please try again.');
+        }
+        return res.json();
+      } catch (err) {
+        if (attempt === 3) { lastErr = err; break; }
+        const isNetworkError = err.message.includes('Failed to fetch') || err.message === 'Network error';
+        if (isNetworkError) {
+          await new Promise(r => setTimeout(r, attempt * 1000));
+        } else { lastErr = err; break; }
       }
     }
+    if (!lastErr || (lastErr.message !== 'Transaction not found. Check the hash and try again.' && lastErr.message !== 'The Kaspa network is currently unavailable. Please try again.')) break;
   }
+  throw lastErr || new Error('Transaction not found');
 }
 
 export async function fetchStatement(address) {
