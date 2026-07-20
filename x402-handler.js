@@ -4,39 +4,13 @@ const MAINNET_API = 'https://api.kaspa.org';
 const TESTNET_API = 'https://api-tn10.kaspa.org';
 
 const usedPaymentIds = new Set();
-const balanceSnapshots = new Map();
 const pendingOffers = new Map();
-const snapshotLocks = new Set();
 
 const EXPIRY_SECONDS = 120;
-
-function apiBase(network) {
-  return network === 'kaspa:testnet-10' ? TESTNET_API : MAINNET_API;
-}
-
-async function ensureSnapshot(payTo, network) {
-  const key = `snap_${payTo}`;
-  if (!balanceSnapshots.has(key) && !snapshotLocks.has(key)) {
-    snapshotLocks.add(key);
-    try {
-      const base = apiBase(network);
-      const res = await fetch(`${base}/addresses/${payTo}/balance`);
-      if (res.ok) {
-        const data = await res.json();
-        balanceSnapshots.set(key, BigInt(data.balance));
-      }
-    } catch {
-    } finally {
-      snapshotLocks.delete(key);
-    }
-  }
-}
 
 export async function generateOffer({ payTo, amountSompi, network }) {
   const paymentId = 'p_' + crypto.randomBytes(16).toString('hex');
   const expires = Math.floor(Date.now() / 1000) + EXPIRY_SECONDS;
-
-  await ensureSnapshot(payTo, network);
 
   pendingOffers.set(paymentId, {
     payTo,
@@ -87,36 +61,54 @@ export async function verifyPayment(paymentId, txid) {
 
   const payTo = offer.payTo;
   const expectedAmount = BigInt(offer.amountSompi);
-  const base = apiBase(offer.network);
 
   try {
-    const res = await fetch(`${base}/addresses/${payTo}/balance`);
-    if (!res.ok) {
-      return { valid: false, reason: 'Could not verify payment' };
-    }
-    const data = await res.json();
-    const currentBalance = BigInt(data.balance);
+    const tx = await fetchTxByNetwork(txid, offer.network);
 
-    const snapshotKey = `snap_${payTo}`;
-    const snapshot = balanceSnapshots.get(snapshotKey);
-    if (snapshot === undefined) {
-      usedPaymentIds.add(paymentId);
-      pendingOffers.delete(paymentId);
-      return { valid: false, reason: 'No balance baseline available' };
+    if (!tx) {
+      return { valid: false, reason: 'Transaction not found on chain' };
     }
 
-    if (currentBalance < snapshot + expectedAmount) {
-      return { valid: false, reason: 'Insufficient payment detected' };
+    if (!tx.is_accepted) {
+      return { valid: false, reason: 'Transaction not yet accepted' };
+    }
+
+    const outputs = tx.outputs || [];
+    let matched = false;
+    for (const out of outputs) {
+      if (out.script_public_key_address === payTo && BigInt(out.amount) >= expectedAmount) {
+        matched = true;
+        break;
+      }
+    }
+
+    if (!matched) {
+      return { valid: false, reason: 'No output paying expected amount to seller address' };
     }
 
     usedPaymentIds.add(paymentId);
-    balanceSnapshots.set(snapshotKey, currentBalance);
     pendingOffers.delete(paymentId);
 
     return { valid: true };
   } catch (err) {
     return { valid: false, reason: `Verification error: ${err.message}` };
   }
+}
+
+async function fetchTxByNetwork(txid, network) {
+  const bases = network === 'kaspa:testnet-10'
+    ? [TESTNET_API]
+    : [MAINNET_API];
+  const params = `?inputs=true&outputs=true&resolve_previous_outpoints=light`;
+
+  for (const base of bases) {
+    try {
+      const res = await fetch(`${base}/transactions/${txid}${params}`);
+      if (res.ok) return res.json();
+    } catch {
+    }
+  }
+  return null;
 }
 
 export function paymentIdFromHeader(header) {
