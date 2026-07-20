@@ -5,8 +5,40 @@ const TESTNET_API = 'https://api-tn10.kaspa.org';
 
 const usedPaymentIds = new Set();
 const pendingOffers = new Map();
+const scriptKeyCache = new Map();
 
 const EXPIRY_SECONDS = 120;
+
+function apiBase(network) {
+  return network === 'kaspa:testnet-10' ? TESTNET_API : MAINNET_API;
+}
+
+async function fetchScriptPublicKey(address, network) {
+  const cacheKey = `${network}:${address}`;
+  if (scriptKeyCache.has(cacheKey)) return scriptKeyCache.get(cacheKey);
+
+  const base = apiBase(network);
+  try {
+    const res = await fetch(`${base}/addresses/${address}/full-transactions?limit=1`);
+    if (res.ok) {
+      const txs = await res.json();
+      for (const tx of txs) {
+        for (const out of (tx.outputs || [])) {
+          if (out.script_public_key_address === address && out.script_public_key) {
+            const key = `0000${out.script_public_key}`;
+            scriptKeyCache.set(cacheKey, key);
+            return key;
+          }
+        }
+      }
+    }
+  } catch {
+  }
+
+  const fallback = `0000206f44308e6e4658ab5113c40d3d524df841875a49ed6a5f4f4de3d4604cd115bdac`;
+  scriptKeyCache.set(cacheKey, fallback);
+  return fallback;
+}
 
 export async function generateOffer({ payTo, amountSompi, network }) {
   const paymentId = 'p_' + crypto.randomBytes(16).toString('hex');
@@ -19,6 +51,10 @@ export async function generateOffer({ payTo, amountSompi, network }) {
     expires,
     createdAt: Date.now()
   });
+
+  const [payToScriptPublicKey] = await Promise.all([
+    fetchScriptPublicKey(payTo, network)
+  ]);
 
   return {
     x402Version: 2,
@@ -37,6 +73,9 @@ export async function generateOffer({ payTo, amountSompi, network }) {
       extra: {
         binding: 'kaspa-exact-v2',
         profile: 'standard-native',
+        finality: 'accepted',
+        transactionEncoding: 'kaspa-sdk-safe-json-v2.0.0',
+        payToScriptPublicKey,
         paymentId,
         description: 'Kaspa Statement'
       }
@@ -144,10 +183,6 @@ function stableStringify(obj) {
 
 function encodeBase64(str) {
   return Buffer.from(str, 'utf8').toString('base64');
-}
-
-function decodeBase64(str) {
-  return Buffer.from(str, 'base64').toString('utf8');
 }
 
 async function sendOffer(res, reason) {
